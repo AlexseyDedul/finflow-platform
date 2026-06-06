@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: finflow-app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finflow
+    username: finflow
+    password: finflow
+  jpa:
+    hibernate:
+      ddl-auto: validate
