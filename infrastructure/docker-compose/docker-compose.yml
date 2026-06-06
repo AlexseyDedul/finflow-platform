@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: finflow
+      POSTGRES_USER: finflow
+      POSTGRES_PASSWORD: finflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - finflow-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finflow -d finflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  finflow-app:
+    build:
+      context: ../../finflow-app
+      dockerfile: Dockerfile
+    container_name: finflow-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finflow
+      SPRING_DATASOURCE_USERNAME: finflow
+      SPRING_DATASOURCE_PASSWORD: finflow
+    ports:
+      - "8080:8080"
+volumes:
+  finflow-postgres-data:
