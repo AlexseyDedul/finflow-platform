@@ -22,12 +22,14 @@
 
     <property name="fileExtensions" value="java, properties, xml"/>
 
-    <!-- Suppress checks that conflict with google-java-format (Spotless) output. -->
-    <module name="SuppressionFilter">
-        <property name="file"
-                  value="${org.checkstyle.google.suppressionfilter.config}"
-                  default="checkstyle-suppressions.xml"/>
-        <property name="optional" value="true"/>
+    <!-- Suppress checks that conflict with google-java-format (Spotless) output.
+         Inlined (instead of an external suppressions file) so the build needs only
+         this config and nothing else has to be on the classpath/build context. -->
+    <!-- google-java-format keeps parameter annotations on one line and does not
+         wrap them, so an annotated record component can exceed the 100-char limit. -->
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="LineLength"/>
+        <property name="files" value="CreateExpenseRequest\.java"/>
     </module>
 
     <!-- Checks for whitespace                               -->

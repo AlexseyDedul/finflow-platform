@@ -136,8 +136,6 @@
                 </dependencies>
                 <configuration>
                     <configLocation>${project.basedir}/google_checks.xml</configLocation>
-                    <suppressionsLocation>${project.basedir}/checkstyle-suppressions.xml</suppressionsLocation>
-                    <suppressionsFileExpression>org.checkstyle.google.suppressionfilter.config</suppressionsFileExpression>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>true</failsOnError>
