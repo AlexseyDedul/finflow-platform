@@ -1,13 +1,11 @@
 package com.dedul.finflow.app.finflowapp.workflow.application;
 
 import com.dedul.finflow.app.finflowapp.expense.application.event.ExpenseSubmittedEvent;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +24,6 @@ public class WorkflowService {
             "expenseId", expenseSubmittedEvent.expenseId().toString(),
             "employeeId", expenseSubmittedEvent.employeeId().toString(),
             "amount", expenseSubmittedEvent.amount().toPlainString(),
-            "currency", expenseSubmittedEvent.currency()
-        )
-    );
+            "currency", expenseSubmittedEvent.currency()));
   }
 }

@@ -25,6 +25,11 @@ app:
       expense-submitted-queue-name: expense-submitted-events
       polling-delay-ms: 5000
 
+  ledger:
+    accounts:
+      expense-account-id: 00000000-0000-0000-0000-000000000301
+      employee-payable-account-id: 00000000-0000-0000-0000-000000000302
+
 camunda:
   bpm:
     admin-user:

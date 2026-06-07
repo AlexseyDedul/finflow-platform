@@ -24,13 +24,9 @@ public class WorkflowTaskController {
   }
 
   @PostMapping("/{taskId}/reject")
-  public void reject(
-          @PathVariable String taskId,
-          @RequestBody RejectWorkflowTaskRequest request
-  ) {
+  public void reject(@PathVariable String taskId, @RequestBody RejectWorkflowTaskRequest request) {
     workflowTaskService.reject(taskId, request.reason());
   }
 
-  public record RejectWorkflowTaskRequest(String reason) {
-  }
+  public record RejectWorkflowTaskRequest(String reason) {}
 }
