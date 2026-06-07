@@ -24,3 +24,12 @@ app:
       access-secret: test
       expense-submitted-queue-name: expense-submitted-events
       polling-delay-ms: 5000
+
+camunda:
+  bpm:
+    admin-user:
+      id: admin
+      password: admin
+      first-name: admin
+    filter:
+      create: All tasks

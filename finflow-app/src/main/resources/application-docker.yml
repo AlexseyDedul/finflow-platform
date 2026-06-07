@@ -34,3 +34,12 @@ app:
       access-secret: ${APP_AWS_SQS_ACCESS_SECRET:test}
       expense-submitted-queue-name: ${APP_AWS_SQS_EXPENSE_SUBMITTED_QUEUE_NAME:expense-submitted-events}
       polling-delay-ms: 5000
+
+camunda:
+  bpm:
+    admin-user:
+      id: admin
+      password: admin
+      first-name: admin
+    filter:
+      create: All tasks

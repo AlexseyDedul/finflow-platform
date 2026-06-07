@@ -1,6 +1,7 @@
 package com.dedul.finflow.app.finflowapp.expense.application.event;
 
 import com.dedul.finflow.app.finflowapp.shared.events.sqs.SqsQueueUrlResolver;
+import com.dedul.finflow.app.finflowapp.workflow.application.WorkflowService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class ExpenseSubmittedEventConsumer {
 
   private final SqsClient sqsClient;
   private final SqsQueueUrlResolver queueUrlResolver;
+  private final WorkflowService workflowService;
   private final ObjectMapper objectMapper;
 
   @Value("${app.aws.sqs.expense-submitted-queue-name}")
@@ -39,12 +41,18 @@ public class ExpenseSubmittedEventConsumer {
     for (var message : response.messages()) {
       try {
         JsonNode root = objectMapper.readTree(message.body());
-
+        JsonNode payloadNode = root.get("payload");
+        ExpenseSubmittedEvent event = objectMapper.treeToValue(
+            payloadNode,
+            ExpenseSubmittedEvent.class
+        );
         log.info(
             "Received SQS event: eventId={}, eventType={}, payload={}",
             root.get("eventId").asText(),
             root.get("eventType").asText(),
             root.get("payload"));
+
+        workflowService.createExpenseApproval(event);
 
         sqsClient.deleteMessage(
             DeleteMessageRequest.builder()
