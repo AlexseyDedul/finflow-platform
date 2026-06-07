@@ -13,8 +13,14 @@ app:
   aws:
     region: eu-central-1
     s3:
-      endpoint: http://s3server:9000
+      endpoint: http://localhost:9000
       access-key: local_env
       access-secret: local_env
       force-path-style: true
       documents-bucket: finflow-documents
+    sqs:
+      endpoint: http://localhost:4566
+      access-key: test
+      access-secret: test
+      expense-submitted-queue-name: expense-submitted-events
+      polling-delay-ms: 5000

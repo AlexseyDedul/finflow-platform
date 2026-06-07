@@ -4,6 +4,8 @@ import com.dedul.finflow.app.finflowapp.account.domain.CurrencyCode;
 import com.dedul.finflow.app.finflowapp.account.domain.Money;
 import com.dedul.finflow.app.finflowapp.expense.api.dto.CreateExpenseRequest;
 import com.dedul.finflow.app.finflowapp.expense.api.dto.ExpenseResponse;
+import com.dedul.finflow.app.finflowapp.expense.application.event.ExpenseEventPublisher;
+import com.dedul.finflow.app.finflowapp.expense.application.event.ExpenseSubmittedEvent;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseClaim;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseStatus;
 import com.dedul.finflow.app.finflowapp.expense.infrastructure.persistence.ExpenseClaimRepository;
@@ -11,18 +13,16 @@ import com.dedul.finflow.app.finflowapp.shared.exception.BusinessRuleViolationEx
 import com.dedul.finflow.app.finflowapp.shared.exception.NotFoundException;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ExpenseService {
   private final ExpenseClaimRepository expenseRepository;
   private final ExpenseMapper expenseMapper;
-
-  public ExpenseService(ExpenseClaimRepository expenseRepository, ExpenseMapper expenseMapper) {
-    this.expenseRepository = expenseRepository;
-    this.expenseMapper = expenseMapper;
-  }
+  private final ExpenseEventPublisher expenseEventPublisher;
 
   @Transactional
   public ExpenseResponse create(CreateExpenseRequest request) {
@@ -75,6 +75,13 @@ public class ExpenseService {
     }
 
     ExpenseClaim saved = expenseRepository.save(expense);
+    expenseEventPublisher.publishExpenseSubmitted(
+        new ExpenseSubmittedEvent(
+            saved.id(),
+            saved.employeeId(),
+            saved.amount().amount(),
+            saved.amount().currency().value()));
+
     return expenseMapper.toResponse(saved);
   }
 
