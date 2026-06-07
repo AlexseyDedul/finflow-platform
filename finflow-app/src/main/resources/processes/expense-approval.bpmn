@@ -25,16 +25,32 @@
 
         <bpmn:exclusiveGateway id="Gateway_Approved" name="Approved?">
             <bpmn:incoming>Flow_ManagerReview_To_ApprovalGateway</bpmn:incoming>
-            <bpmn:outgoing>Flow_Approved_To_End</bpmn:outgoing>
-            <bpmn:outgoing>Flow_Rejected_To_End</bpmn:outgoing>
+            <bpmn:outgoing>Flow_Approved_To_PostLedger</bpmn:outgoing>
+            <bpmn:outgoing>Flow_Rejected_To_RejectExpense</bpmn:outgoing>
         </bpmn:exclusiveGateway>
 
+        <bpmn:serviceTask
+                id="ServiceTask_PostLedger"
+                name="Post Ledger"
+                camunda:delegateExpression="${postLedgerDelegate}">
+            <bpmn:incoming>Flow_Approved_To_PostLedger</bpmn:incoming>
+            <bpmn:outgoing>Flow_PostLedger_To_ApprovedEnd</bpmn:outgoing>
+        </bpmn:serviceTask>
+
+        <bpmn:serviceTask
+                id="ServiceTask_RejectExpense"
+                name="Reject Expense"
+                camunda:delegateExpression="${rejectExpenseDelegate}">
+            <bpmn:incoming>Flow_Rejected_To_RejectExpense</bpmn:incoming>
+            <bpmn:outgoing>Flow_RejectExpense_To_RejectedEnd</bpmn:outgoing>
+        </bpmn:serviceTask>
+
         <bpmn:endEvent id="EndEvent_Approved" name="Approved">
-            <bpmn:incoming>Flow_Approved_To_End</bpmn:incoming>
+            <bpmn:incoming>Flow_PostLedger_To_ApprovedEnd</bpmn:incoming>
         </bpmn:endEvent>
 
         <bpmn:endEvent id="EndEvent_Rejected" name="Rejected">
-            <bpmn:incoming>Flow_Rejected_To_End</bpmn:incoming>
+            <bpmn:incoming>Flow_RejectExpense_To_RejectedEnd</bpmn:incoming>
         </bpmn:endEvent>
 
         <bpmn:sequenceFlow
@@ -48,20 +64,30 @@
                 targetRef="Gateway_Approved" />
 
         <bpmn:sequenceFlow
-                id="Flow_Approved_To_End"
+                id="Flow_Approved_To_PostLedger"
                 sourceRef="Gateway_Approved"
-                targetRef="EndEvent_Approved">
+                targetRef="ServiceTask_PostLedger">
             <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
                                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${approved == true}</bpmn:conditionExpression>
         </bpmn:sequenceFlow>
 
         <bpmn:sequenceFlow
-                id="Flow_Rejected_To_End"
+                id="Flow_PostLedger_To_ApprovedEnd"
+                sourceRef="ServiceTask_PostLedger"
+                targetRef="EndEvent_Approved" />
+
+        <bpmn:sequenceFlow
+                id="Flow_Rejected_To_RejectExpense"
                 sourceRef="Gateway_Approved"
-                targetRef="EndEvent_Rejected">
+                targetRef="ServiceTask_RejectExpense">
             <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
                                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">${approved == false}</bpmn:conditionExpression>
         </bpmn:sequenceFlow>
+
+        <bpmn:sequenceFlow
+                id="Flow_RejectExpense_To_RejectedEnd"
+                sourceRef="ServiceTask_RejectExpense"
+                targetRef="EndEvent_Rejected" />
 
     </bpmn:process>
 
@@ -80,12 +106,12 @@
                 <dc:Bounds x="470" y="113" width="50" height="50" />
             </bpmndi:BPMNShape>
 
-            <bpmndi:BPMNShape id="EndEvent_Approved_di" bpmnElement="EndEvent_Approved">
-                <dc:Bounds x="610" y="70" width="36" height="36" />
+            <bpmndi:BPMNShape id="ServiceTask_PostLedger_di" bpmnElement="ServiceTask_PostLedger">
+                <dc:Bounds x="580" y="98" width="140" height="80" />
             </bpmndi:BPMNShape>
 
-            <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
-                <dc:Bounds x="610" y="170" width="36" height="36" />
+            <bpmndi:BPMNShape id="EndEvent_Approved_di" bpmnElement="EndEvent_Approved">
+                <dc:Bounds x="790" y="120" width="36" height="36" />
             </bpmndi:BPMNShape>
 
             <bpmndi:BPMNEdge id="Flow_Start_To_ManagerReview_di" bpmnElement="Flow_Start_To_ManagerReview">
@@ -98,18 +124,34 @@
                 <di:waypoint x="470" y="138" />
             </bpmndi:BPMNEdge>
 
-            <bpmndi:BPMNEdge id="Flow_Approved_To_End_di" bpmnElement="Flow_Approved_To_End">
-                <di:waypoint x="495" y="113" />
-                <di:waypoint x="495" y="88" />
-                <di:waypoint x="610" y="88" />
+            <bpmndi:BPMNEdge id="Flow_Approved_To_PostLedger_di" bpmnElement="Flow_Approved_To_PostLedger">
+                <di:waypoint x="520" y="138" />
+                <di:waypoint x="580" y="138" />
             </bpmndi:BPMNEdge>
 
-            <bpmndi:BPMNEdge id="Flow_Rejected_To_End_di" bpmnElement="Flow_Rejected_To_End">
+            <bpmndi:BPMNEdge id="Flow_PostLedger_To_ApprovedEnd_di" bpmnElement="Flow_PostLedger_To_ApprovedEnd">
+                <di:waypoint x="720" y="138" />
+                <di:waypoint x="790" y="138" />
+            </bpmndi:BPMNEdge>
+
+            <bpmndi:BPMNShape id="ServiceTask_RejectExpense_di" bpmnElement="ServiceTask_RejectExpense">
+                <dc:Bounds x="580" y="190" width="140" height="80" />
+            </bpmndi:BPMNShape>
+
+            <bpmndi:BPMNShape id="EndEvent_Rejected_di" bpmnElement="EndEvent_Rejected">
+                <dc:Bounds x="790" y="212" width="36" height="36" />
+            </bpmndi:BPMNShape>
+
+            <bpmndi:BPMNEdge id="Flow_Rejected_To_RejectExpense_di" bpmnElement="Flow_Rejected_To_RejectExpense">
                 <di:waypoint x="495" y="163" />
-                <di:waypoint x="495" y="188" />
-                <di:waypoint x="610" y="188" />
+                <di:waypoint x="495" y="230" />
+                <di:waypoint x="580" y="230" />
             </bpmndi:BPMNEdge>
 
+            <bpmndi:BPMNEdge id="Flow_RejectExpense_To_RejectedEnd_di" bpmnElement="Flow_RejectExpense_To_RejectedEnd">
+                <di:waypoint x="720" y="230" />
+                <di:waypoint x="790" y="230" />
+            </bpmndi:BPMNEdge>
         </bpmndi:BPMNPlane>
     </bpmndi:BPMNDiagram>
 

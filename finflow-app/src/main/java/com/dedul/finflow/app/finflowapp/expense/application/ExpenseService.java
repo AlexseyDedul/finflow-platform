@@ -48,6 +48,12 @@ public class ExpenseService {
   }
 
   @Transactional(readOnly = true)
+  public ExpenseClaim getDomainById(UUID id) {
+    return expenseRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Expense claim not found: " + id));
+  }
+
+  @Transactional(readOnly = true)
   public List<ExpenseResponse> getByEmployeeId(UUID employeeId) {
     return expenseRepository.findAllByEmployeeId(employeeId).stream()
         .map(expenseMapper::toResponse)
@@ -106,5 +112,25 @@ public class ExpenseService {
     if (expenseRepository.findById(id).isEmpty()) {
       throw new NotFoundException("Expense claim not found: " + id);
     }
+  }
+
+  @Transactional
+  public void markApproved(UUID expenseId) {
+    ExpenseClaim expense = expenseRepository.findById(expenseId)
+        .orElseThrow(() -> new NotFoundException("Expense claim not found: " + expenseId));
+
+    expense.approve();
+
+    expenseRepository.save(expense);
+  }
+
+  @Transactional
+  public void markRejected(UUID expenseId, String reason) {
+    ExpenseClaim expense = expenseRepository.findById(expenseId)
+        .orElseThrow(() -> new NotFoundException("Expense claim not found: " + expenseId));
+
+    expense.reject(reason);
+
+    expenseRepository.save(expense);
   }
 }

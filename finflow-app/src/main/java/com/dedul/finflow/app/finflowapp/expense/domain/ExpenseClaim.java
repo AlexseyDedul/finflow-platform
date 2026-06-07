@@ -1,6 +1,8 @@
 package com.dedul.finflow.app.finflowapp.expense.domain;
 
 import com.dedul.finflow.app.finflowapp.account.domain.Money;
+import com.dedul.finflow.app.finflowapp.shared.exception.InvalidExpenseStateException;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -68,6 +70,14 @@ public class ExpenseClaim {
         id, employeeId, amount, category, description, status, createdAt, submittedAt, cancelledAt);
   }
 
+  public void approve() {
+    if (status != ExpenseStatus.SUBMITTED && status != ExpenseStatus.MANAGER_REVIEW) {
+      throw new InvalidExpenseStateException("Only submitted expense can be approved");
+    }
+
+    status = ExpenseStatus.APPROVED;
+  }
+
   public void submit() {
     if (status != ExpenseStatus.DRAFT) {
       throw new IllegalStateException("Only DRAFT expense can be submitted");
@@ -82,6 +92,14 @@ public class ExpenseClaim {
     }
     status = ExpenseStatus.CANCELLED;
     cancelledAt = Instant.now();
+  }
+
+  public void reject(String reason) {
+    if (status != ExpenseStatus.SUBMITTED && status != ExpenseStatus.MANAGER_REVIEW) {
+      throw new InvalidExpenseStateException("Only submitted expense can be rejected. Reason: " + reason);
+    }
+
+    status = ExpenseStatus.REJECTED;
   }
 
   private static String normalizeDescription(String description) {

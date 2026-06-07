@@ -42,10 +42,8 @@ public class ExpenseSubmittedEventConsumer {
       try {
         JsonNode root = objectMapper.readTree(message.body());
         JsonNode payloadNode = root.get("payload");
-        ExpenseSubmittedEvent event = objectMapper.treeToValue(
-            payloadNode,
-            ExpenseSubmittedEvent.class
-        );
+        ExpenseSubmittedEvent event =
+            objectMapper.treeToValue(payloadNode, ExpenseSubmittedEvent.class);
         log.info(
             "Received SQS event: eventId={}, eventType={}, payload={}",
             root.get("eventId").asText(),
