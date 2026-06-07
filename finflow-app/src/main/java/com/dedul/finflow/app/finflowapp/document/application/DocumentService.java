@@ -37,12 +37,7 @@ public class DocumentService {
       byte[] content = file.getBytes();
 
       var storedObject =
-          storage.upload(
-              ownerType.name(),
-              ownerId,
-              originalFilename,
-              contentType,
-              content);
+          storage.upload(ownerType.name(), ownerId, originalFilename, contentType, content);
 
       StoredDocument document =
           StoredDocument.create(

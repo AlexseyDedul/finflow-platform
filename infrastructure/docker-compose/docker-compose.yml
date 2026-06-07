@@ -46,6 +46,39 @@ services:
     command: >
       sh -c "aws --endpoint-url=http://s3server:9000 s3 mb s3://finflow-documents || true"
 
+  localstack:
+    image: localstack/localstack:4.4.0
+    container_name: finflow-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: eu-central-1
+      DEBUG: "1"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:4566/_localstack/health || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  init-localstack-sqs:
+    image: amazon/aws-cli:latest
+    container_name: finflow-init-sqs
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: []
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: eu-central-1
+    command:
+      - /bin/sh
+      - -c
+      - |
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name expense-submitted-events || true
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name expense-submitted-events-dlq || true
+
   finflow-app:
     build:
       context: ../../finflow-app
@@ -54,6 +87,14 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      s3server:
+        condition: service_healthy
+      init-s3server-finflow-documents-bucked:
+        condition: service_completed_successfully
+      localstack:
+        condition: service_healthy
+      init-localstack-sqs:
+        condition: service_completed_successfully
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finflow
@@ -66,6 +107,9 @@ services:
       APP_AWS_S3_ACCESS_SECRET: local_env
       APP_AWS_S3_FORCE_PATH_STYLE: "true"
       APP_AWS_S3_DOCUMENTS_BUCKET: finflow-documents
+
+      APP_AWS_SQS_ENDPOINT: http://localstack:4566
+      APP_AWS_SQS_EXPENSE_SUBMITTED_QUEUE_NAME: expense-submitted-events
     ports:
       - "8080:8080"
 volumes:

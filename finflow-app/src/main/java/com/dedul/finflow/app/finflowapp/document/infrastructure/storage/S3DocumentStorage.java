@@ -21,11 +21,7 @@ public class S3DocumentStorage {
   }
 
   public StoredObject upload(
-      String ownerType,
-      UUID ownerId,
-      String originalFilename,
-      String contentType,
-      byte[] content) {
+      String ownerType, UUID ownerId, String originalFilename, String contentType, byte[] content) {
     String objectKey =
         ownerType.toLowerCase()
             + "/"
