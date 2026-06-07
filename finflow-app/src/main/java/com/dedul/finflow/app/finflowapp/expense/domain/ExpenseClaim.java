@@ -71,6 +71,10 @@ public class ExpenseClaim {
   }
 
   public void approve() {
+    if (status == ExpenseStatus.APPROVED) {
+      return;
+    }
+
     if (status != ExpenseStatus.SUBMITTED && status != ExpenseStatus.MANAGER_REVIEW) {
       throw new InvalidExpenseStateException("Only submitted expense can be approved");
     }
@@ -95,8 +99,12 @@ public class ExpenseClaim {
   }
 
   public void reject(String reason) {
+    if (status == ExpenseStatus.REJECTED) {
+      return;
+    }
+
     if (status != ExpenseStatus.SUBMITTED && status != ExpenseStatus.MANAGER_REVIEW) {
-      throw new InvalidExpenseStateException("Only submitted expense can be rejected. Reason: " + reason);
+      throw new InvalidExpenseStateException("Only submitted expense can be rejected. Current status: " + status);
     }
 
     status = ExpenseStatus.REJECTED;

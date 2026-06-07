@@ -3,6 +3,7 @@ package com.dedul.finflow.app.finflowapp.workflow.application.delegate;
 import com.dedul.finflow.app.finflowapp.expense.application.ExpenseService;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseClaim;
 import com.dedul.finflow.app.finflowapp.ledger.application.LedgerService;
+import com.dedul.finflow.app.finflowapp.notification.application.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class PostLedgerDelegate implements JavaDelegate {
   private final LedgerService ledgerService;
   private final ExpenseService expenseService;
+  private final NotificationService notificationService;
 
   @Value("${app.ledger.accounts.expense-account-id}")
   private UUID expenseAccountId;
@@ -39,6 +41,13 @@ public class PostLedgerDelegate implements JavaDelegate {
     );
 
     expenseService.markApproved(expenseId);
+
+    notificationService
+        .sendExpenseApprovedNotification(expense.employeeId(), expenseId)
+        .exceptionally(error -> {
+          log.error("Async approved notification failed: expenseId={}", expenseId, error);
+          return null;
+        });
 
     log.info(
         "Posted ledger transaction for expense: expenseId={}, processInstanceId={}",

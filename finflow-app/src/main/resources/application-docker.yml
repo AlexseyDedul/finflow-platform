@@ -48,3 +48,7 @@ camunda:
       first-name: admin
     filter:
       create: All tasks
+
+logging:
+  pattern:
+    level: "%5p [correlationId:%X{correlationId:-}]"
