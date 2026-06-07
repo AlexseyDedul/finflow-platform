@@ -14,6 +14,38 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  s3server:
+    image: minio/minio:latest
+    container_name: finflow-s3server
+    ports:
+      - "9000:9000"
+      - "9009:9009"
+    environment:
+      MINIO_ROOT_USER: local_env
+      MINIO_ROOT_PASSWORD: local_env
+    command: 'server --console-address ":9009" /data'
+    volumes:
+      - finflow-minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  init-s3server-finflow-documents-bucked:
+    image: garland/aws-cli-docker
+    container_name: finflow-init-s3-bucket
+    depends_on:
+      s3server:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: local_env
+      AWS_SECRET_ACCESS_KEY: local_env
+      AWS_DEFAULT_REGION: eu-central-1
+    command: >
+      sh -c "aws --endpoint-url=http://s3server:9000 s3 mb s3://finflow-documents || true"
+
   finflow-app:
     build:
       context: ../../finflow-app
@@ -27,7 +59,15 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finflow
       SPRING_DATASOURCE_USERNAME: finflow
       SPRING_DATASOURCE_PASSWORD: finflow
+
+      APP_AWS_REGION: eu-central-1
+      APP_AWS_S3_ENDPOINT: http://s3server:9000
+      APP_AWS_S3_ACCESS_KEY: local_env
+      APP_AWS_S3_ACCESS_SECRET: local_env
+      APP_AWS_S3_FORCE_PATH_STYLE: "true"
+      APP_AWS_S3_DOCUMENTS_BUCKET: finflow-documents
     ports:
       - "8080:8080"
 volumes:
   finflow-postgres-data:
+  finflow-minio-data:

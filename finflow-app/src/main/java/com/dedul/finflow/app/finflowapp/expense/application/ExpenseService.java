@@ -93,4 +93,11 @@ public class ExpenseService {
     ExpenseClaim saved = expenseRepository.save(expense);
     return expenseMapper.toResponse(saved);
   }
+
+  @Transactional(readOnly = true)
+  public void ensureExpenseExists(UUID id) {
+    if (expenseRepository.findById(id).isEmpty()) {
+      throw new NotFoundException("Expense claim not found: " + id);
+    }
+  }
 }
