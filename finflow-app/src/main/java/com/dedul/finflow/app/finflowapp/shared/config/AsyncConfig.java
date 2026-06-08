@@ -29,6 +29,22 @@ public class AsyncConfig {
     return executor;
   }
 
+  @Bean(name = "sqsMessageProcessingExecutor")
+  public Executor sqsMessageProcessingExecutor(TaskDecorator mdcTaskDecorator) {
+    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    executor.setCorePoolSize(4);
+    executor.setMaxPoolSize(8);
+    executor.setQueueCapacity(50);
+    executor.setThreadNamePrefix("finflow-sqs-");
+    executor.setWaitForTasksToCompleteOnShutdown(true);
+    executor.setAwaitTerminationSeconds(30);
+    executor.setTaskDecorator(mdcTaskDecorator);
+
+    executor.initialize();
+
+    return executor;
+  }
+
   @Bean
   public TaskDecorator mdcTaskDecorator() {
     return runnable -> {
