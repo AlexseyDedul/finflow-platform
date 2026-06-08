@@ -25,4 +25,9 @@ public class SqsEventPublisher {
       throw new IllegalStateException("Failed to serialize event: " + event.eventType(), e);
     }
   }
+
+  public void publishRaw(String queueUrl, String body) {
+    sqsClient.sendMessage(
+        SendMessageRequest.builder().queueUrl(queueUrl).messageBody(body).build());
+  }
 }

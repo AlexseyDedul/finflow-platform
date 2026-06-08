@@ -2,7 +2,6 @@ package com.dedul.finflow.app.finflowapp.expense.domain;
 
 import com.dedul.finflow.app.finflowapp.account.domain.Money;
 import com.dedul.finflow.app.finflowapp.shared.exception.InvalidExpenseStateException;
-
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -104,7 +103,8 @@ public class ExpenseClaim {
     }
 
     if (status != ExpenseStatus.SUBMITTED && status != ExpenseStatus.MANAGER_REVIEW) {
-      throw new InvalidExpenseStateException("Only submitted expense can be rejected. Current status: " + status);
+      throw new InvalidExpenseStateException(
+          "Only submitted expense can be rejected. Current status: " + status);
     }
 
     status = ExpenseStatus.REJECTED;

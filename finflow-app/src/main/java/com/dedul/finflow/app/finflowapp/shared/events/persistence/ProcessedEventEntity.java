@@ -16,8 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProcessedEventEntity {
 
-  @Id
-  private UUID eventId;
+  @Id private UUID eventId;
 
   @Column(nullable = false, length = 100)
   private String eventType;

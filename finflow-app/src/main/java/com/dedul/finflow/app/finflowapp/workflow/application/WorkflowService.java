@@ -1,12 +1,7 @@
 package com.dedul.finflow.app.finflowapp.workflow.application;
 
 import com.dedul.finflow.app.finflowapp.expense.application.event.ExpenseSubmittedEvent;
-
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
-import com.dedul.finflow.app.finflowapp.workflow.api.dto.WorkflowTaskResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
@@ -28,7 +23,8 @@ public class WorkflowService {
   public void startExpenseApproval(ExpenseSubmittedEvent expenseSubmittedEvent) {
     String buisnessKey = expenseSubmittedEvent.expenseId().toString();
 
-    long activeInstances = runtimeService
+    long activeInstances =
+        runtimeService
             .createProcessInstanceQuery()
             .processDefinitionKey(EXPENSE_APPROVAL_PROCESS_KEY)
             .processInstanceBusinessKey(buisnessKey)
@@ -38,8 +34,7 @@ public class WorkflowService {
     if (activeInstances > 0) {
       log.info(
           "Expense approval workflow already active, skipping: expenseId={}",
-          expenseSubmittedEvent.expenseId()
-      );
+          expenseSubmittedEvent.expenseId());
       return;
     }
 

@@ -4,7 +4,6 @@ import com.dedul.finflow.app.finflowapp.workflow.api.dto.WorkflowTaskResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.engine.TaskService;
 import org.springframework.stereotype.Service;
@@ -20,14 +19,10 @@ public class WorkflowTaskService {
             task -> {
               Object expenseIdValue = taskService.getVariable(task.getId(), "expenseId");
 
-              UUID expenseId = expenseIdValue == null
-                  ? null
-                  : UUID.fromString(expenseIdValue.toString());
+              UUID expenseId =
+                  expenseIdValue == null ? null : UUID.fromString(expenseIdValue.toString());
               return new WorkflowTaskResponse(
-                  task.getId(),
-                  task.getName(),
-                  task.getProcessInstanceId(),
-                  expenseId);
+                  task.getId(), task.getName(), task.getProcessInstanceId(), expenseId);
             })
         .toList();
   }
