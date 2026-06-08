@@ -4,13 +4,13 @@ import com.dedul.finflow.app.finflowapp.account.domain.CurrencyCode;
 import com.dedul.finflow.app.finflowapp.account.domain.Money;
 import com.dedul.finflow.app.finflowapp.expense.api.dto.CreateExpenseRequest;
 import com.dedul.finflow.app.finflowapp.expense.api.dto.ExpenseResponse;
-import com.dedul.finflow.app.finflowapp.expense.application.event.ExpenseEventPublisher;
 import com.dedul.finflow.app.finflowapp.expense.application.event.ExpenseSubmittedEvent;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseClaim;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseStatus;
 import com.dedul.finflow.app.finflowapp.expense.infrastructure.persistence.ExpenseClaimRepository;
 import com.dedul.finflow.app.finflowapp.shared.exception.BusinessRuleViolationException;
 import com.dedul.finflow.app.finflowapp.shared.exception.NotFoundException;
+import com.dedul.finflow.app.finflowapp.shared.outbox.OutboxService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExpenseService {
   private final ExpenseClaimRepository expenseRepository;
   private final ExpenseMapper expenseMapper;
-  private final ExpenseEventPublisher expenseEventPublisher;
+  private final OutboxService outboxService;
 
   @Transactional
   public ExpenseResponse create(CreateExpenseRequest request) {
@@ -49,7 +49,8 @@ public class ExpenseService {
 
   @Transactional(readOnly = true)
   public ExpenseClaim getDomainById(UUID id) {
-    return expenseRepository.findById(id)
+    return expenseRepository
+        .findById(id)
         .orElseThrow(() -> new NotFoundException("Expense claim not found: " + id));
   }
 
@@ -81,7 +82,9 @@ public class ExpenseService {
     }
 
     ExpenseClaim saved = expenseRepository.save(expense);
-    expenseEventPublisher.publishExpenseSubmitted(
+    outboxService.saveEvent(
+        saved.id(),
+        "ExpenseSubmittedEvent",
         new ExpenseSubmittedEvent(
             saved.id(),
             saved.employeeId(),
@@ -116,8 +119,10 @@ public class ExpenseService {
 
   @Transactional
   public void markApproved(UUID expenseId) {
-    ExpenseClaim expense = expenseRepository.findById(expenseId)
-        .orElseThrow(() -> new NotFoundException("Expense claim not found: " + expenseId));
+    ExpenseClaim expense =
+        expenseRepository
+            .findById(expenseId)
+            .orElseThrow(() -> new NotFoundException("Expense claim not found: " + expenseId));
 
     expense.approve();
 
@@ -126,8 +131,10 @@ public class ExpenseService {
 
   @Transactional
   public void markRejected(UUID expenseId, String reason) {
-    ExpenseClaim expense = expenseRepository.findById(expenseId)
-        .orElseThrow(() -> new NotFoundException("Expense claim not found: " + expenseId));
+    ExpenseClaim expense =
+        expenseRepository
+            .findById(expenseId)
+            .orElseThrow(() -> new NotFoundException("Expense claim not found: " + expenseId));
 
     expense.reject(reason);
 

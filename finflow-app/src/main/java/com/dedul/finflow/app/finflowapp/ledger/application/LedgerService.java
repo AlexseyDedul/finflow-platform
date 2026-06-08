@@ -8,7 +8,6 @@ import com.dedul.finflow.app.finflowapp.ledger.domain.LedgerReferenceType;
 import com.dedul.finflow.app.finflowapp.ledger.domain.LedgerTransaction;
 import com.dedul.finflow.app.finflowapp.ledger.infrastructure.persistence.LedgerRepository;
 import com.dedul.finflow.app.finflowapp.shared.exception.BusinessRuleViolationException;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -53,31 +52,25 @@ public class LedgerService {
       UUID employeePayableAccountId,
       UUID expenseAccountId,
       BigDecimal amount,
-      String currency
-  ) {
+      String currency) {
     return ledgerRepository
         .findByReference(expenseId, LedgerReferenceType.EXPENSE_CLAIM)
         .map(mapper::toResponse)
-        .orElseGet(() -> {
-          PostLedgerTransactionRequest request = new PostLedgerTransactionRequest(
-              expenseId,
-              LedgerReferenceType.EXPENSE_CLAIM,
-              List.of(
-                  new PostLedgerTransactionRequest.LedgerEntryRequest(
-                      expenseAccountId,
-                      LedgerEntryDirection.DEBIT,
-                      amount,
-                      currency
-                  ),
-                  new PostLedgerTransactionRequest.LedgerEntryRequest(
-                      employeePayableAccountId,
-                      LedgerEntryDirection.CREDIT,
-                      amount,
-                      currency
-                  )
-              )
-          );
-          return post(request);
-        });
+        .orElseGet(
+            () -> {
+              PostLedgerTransactionRequest request =
+                  new PostLedgerTransactionRequest(
+                      expenseId,
+                      LedgerReferenceType.EXPENSE_CLAIM,
+                      List.of(
+                          new PostLedgerTransactionRequest.LedgerEntryRequest(
+                              expenseAccountId, LedgerEntryDirection.DEBIT, amount, currency),
+                          new PostLedgerTransactionRequest.LedgerEntryRequest(
+                              employeePayableAccountId,
+                              LedgerEntryDirection.CREDIT,
+                              amount,
+                              currency)));
+              return post(request);
+            });
   }
 }

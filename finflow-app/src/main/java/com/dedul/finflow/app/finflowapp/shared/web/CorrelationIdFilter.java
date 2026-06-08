@@ -18,10 +18,8 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      FilterChain filterChain
-  ) throws ServletException, IOException {
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
     String correlationId = request.getHeader(CORRELATION_ID_HEADER);
 
     if (correlationId == null || correlationId.isBlank()) {

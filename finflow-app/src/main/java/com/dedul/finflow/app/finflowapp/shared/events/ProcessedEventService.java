@@ -2,13 +2,12 @@ package com.dedul.finflow.app.finflowapp.shared.events;
 
 import com.dedul.finflow.app.finflowapp.shared.events.persistence.ProcessedEventEntity;
 import com.dedul.finflow.app.finflowapp.shared.events.persistence.ProcessedEventJpaRepository;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +20,7 @@ public class ProcessedEventService {
   }
 
   @Transactional
-  public void markProcessed(UUID eventId, String eventType){
+  public void markProcessed(UUID eventId, String eventType) {
     if (processedEventJpaRepository.existsById(eventId)) {
       return;
     }
@@ -29,15 +28,16 @@ public class ProcessedEventService {
   }
 
   @Transactional
-  public boolean tryMarkProcessed(UUID eventId, String eventType){
+  public boolean tryMarkProcessed(UUID eventId, String eventType) {
     try {
       if (processedEventJpaRepository.existsById(eventId)) {
         return false;
       }
 
-      processedEventJpaRepository.saveAndFlush(new ProcessedEventEntity(eventId, eventType, Instant.now()));
+      processedEventJpaRepository.saveAndFlush(
+          new ProcessedEventEntity(eventId, eventType, Instant.now()));
       return true;
-    } catch (DataIntegrityViolationException e){
+    } catch (DataIntegrityViolationException e) {
       return false;
     }
   }

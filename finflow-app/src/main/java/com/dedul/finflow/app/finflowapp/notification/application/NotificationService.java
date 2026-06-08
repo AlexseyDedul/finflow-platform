@@ -12,41 +12,28 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
   @Async("applicationTaskExecutor")
-  public CompletableFuture<Void> sendExpenseApprovedNotification(
-      UUID employeeId,
-      UUID expenseId
-  ) {
+  public CompletableFuture<Void> sendExpenseApprovedNotification(UUID employeeId, UUID expenseId) {
     return sendNotification(
         employeeId,
         expenseId,
         NotificationType.EXPENSE_APPROVED,
         "Expense approved",
-        "Your expense claim has been approved."
-    );
+        "Your expense claim has been approved.");
   }
 
   @Async("applicationTaskExecutor")
   public CompletableFuture<Void> sendExpenseRejectedNotification(
-      UUID employeeId,
-      UUID expenseId,
-      String reason
-  ) {
+      UUID employeeId, UUID expenseId, String reason) {
     return sendNotification(
         employeeId,
         expenseId,
         NotificationType.EXPENSE_REJECTED,
         "Expense rejected",
-        "Your expense claim has been rejected. Reason: " + reason
-    );
+        "Your expense claim has been rejected. Reason: " + reason);
   }
 
   private CompletableFuture<Void> sendNotification(
-      UUID employeeId,
-      UUID expenseId,
-      NotificationType type,
-      String title,
-      String body
-  ) {
+      UUID employeeId, UUID expenseId, NotificationType type, String title, String body) {
     try {
       simulateSlowNotificationProvider();
 
@@ -56,8 +43,7 @@ public class NotificationService {
           employeeId,
           expenseId,
           title,
-          body
-      );
+          body);
 
       return CompletableFuture.completedFuture(null);
     } catch (Exception e) {
@@ -66,8 +52,7 @@ public class NotificationService {
           type,
           employeeId,
           expenseId,
-          e
-      );
+          e);
 
       return CompletableFuture.failedFuture(e);
     }

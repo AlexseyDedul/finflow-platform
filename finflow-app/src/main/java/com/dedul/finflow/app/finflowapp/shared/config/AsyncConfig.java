@@ -1,7 +1,6 @@
 package com.dedul.finflow.app.finflowapp.shared.config;
 
 import java.util.concurrent.Executor;
-
 import org.slf4j.MDC;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
