@@ -5,7 +5,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.TaskService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,17 +16,16 @@ public class WorkflowService {
   private static final String EXPENSE_APPROVAL_PROCESS_KEY = "expenseApprovalProcess";
 
   private final RuntimeService runtimeService;
-  private final TaskService taskService;
 
   @Transactional
   public void startExpenseApproval(ExpenseSubmittedEvent expenseSubmittedEvent) {
-    String buisnessKey = expenseSubmittedEvent.expenseId().toString();
+    String businessKey = expenseSubmittedEvent.expenseId().toString();
 
     long activeInstances =
         runtimeService
             .createProcessInstanceQuery()
             .processDefinitionKey(EXPENSE_APPROVAL_PROCESS_KEY)
-            .processInstanceBusinessKey(buisnessKey)
+            .processInstanceBusinessKey(businessKey)
             .active()
             .count();
 
