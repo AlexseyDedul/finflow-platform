@@ -4,6 +4,8 @@ import com.dedul.finflow.app.finflowapp.account.domain.CurrencyCode;
 import com.dedul.finflow.app.finflowapp.account.domain.Money;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseClaim;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseStatus;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +41,14 @@ public class ExpenseClaimRepository {
         .stream()
         .map(this::toDomain)
         .toList();
+  }
+
+  public List<ExpenseClaim> findCreatedBetween(Instant from, Instant to) {
+    return jpaRepository
+            .findByCreatedAtGreaterThanEqualAndCreatedAtLessThan(from, to)
+            .stream()
+            .map(this::toDomain)
+            .toList();
   }
 
   private ExpenseClaimEntity toEntity(ExpenseClaim expense) {
