@@ -1,0 +1,50 @@
+spring:
+  datasource:
+    url: "jdbc:h2:mem:finflow-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;INIT=CREATE TYPE IF NOT EXISTS JSONB AS VARCHAR"
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: always
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+  flyway:
+    enabled: false
+
+camunda:
+  bpm:
+    enabled: false
+
+app:
+  aws:
+    region: eu-central-1
+    s3:
+      endpoint: http://localhost:9000
+      access-key: test
+      access-secret: test
+      force-path-style: true
+      documents-bucket: finflow-documents
+    sqs:
+      endpoint: http://localhost:4566
+      access-key: test
+      access-secret: test
+      expense-submitted-queue-name: expense-submitted-events
+      polling-delay-ms: 5000
+
+  ledger:
+    accounts:
+      expense-account-id: 00000000-0000-0000-0000-000000000301
+      employee-payable-account-id: 00000000-0000-0000-0000-000000000302
+
+management:
+  tracing:
+    enabled: false
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+

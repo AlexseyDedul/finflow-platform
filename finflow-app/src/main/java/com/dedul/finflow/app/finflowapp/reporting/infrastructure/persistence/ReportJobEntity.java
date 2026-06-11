@@ -71,6 +71,11 @@ public class ReportJobEntity {
   }
 
   public void markRunning() {
+    if (status != ReportJobStatus.PENDING) {
+      throw new IllegalStateException(
+          "Only PENDING report job can be started. Current status: " + status);
+    }
+
     status = ReportJobStatus.RUNNING;
     startedAt = Instant.now();
   }
