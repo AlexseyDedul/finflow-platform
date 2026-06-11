@@ -1,19 +1,17 @@
 package com.dedul.finflow.app.finflowapp.shared.outbox;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DataJpaTest
 @ActiveProfiles("test")
 class OutboxEventRepositoryTest {
-  @Autowired
-  private OutboxEventRepository repository;
+  @Autowired private OutboxEventRepository repository;
 
   @Test
   void claimForProcessing_shouldMovePendingEventToProcessing() {

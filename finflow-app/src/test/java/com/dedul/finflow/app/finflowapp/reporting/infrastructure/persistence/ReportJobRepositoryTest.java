@@ -32,7 +32,7 @@ class ReportJobRepositoryTest {
   @Test
   void claimPendingJob_shouldNotClaimAlreadyRunningJob() {
     ReportJobEntity job =
-            repository.saveAndFlush(ReportJobEntity.createMonthlyExpensesJob("2026-06"));
+        repository.saveAndFlush(ReportJobEntity.createMonthlyExpensesJob("2026-06"));
 
     int firstClaim = repository.claimPendingJob(job.getId());
     int secondClaim = repository.claimPendingJob(job.getId());

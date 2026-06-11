@@ -1,7 +1,6 @@
 package com.dedul.finflow.app.finflowapp.reporting.infrastructure.persistence;
 
 import com.dedul.finflow.app.finflowapp.reporting.domain.ReportJobStatus;
-
 import java.time.Instant;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,16 +22,10 @@ public interface ReportJobRepository extends JpaRepository<ReportJobEntity, UUID
       @Param("id") UUID id,
       @Param("runningStatus") ReportJobStatus runningStatus,
       @Param("startedAt") Instant startedAt,
-      @Param("pendingStatus") ReportJobStatus pendingStatus
-  );
+      @Param("pendingStatus") ReportJobStatus pendingStatus);
 
   default int claimPendingJob(UUID id) {
-    return claimPendingJob(
-        id,
-        ReportJobStatus.RUNNING,
-        Instant.now(),
-        ReportJobStatus.PENDING
-    );
+    return claimPendingJob(id, ReportJobStatus.RUNNING, Instant.now(), ReportJobStatus.PENDING);
   }
 
   long countByStatus(ReportJobStatus status);

@@ -40,8 +40,8 @@ class ReportJobEntityTest {
     job.markCompleted("reports/2026-06/report.csv", "text/csv", "report.csv");
 
     assertThatThrownBy(job::markRunning)
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Only PENDING report job can be started");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Only PENDING report job can be started");
   }
 
   @Test

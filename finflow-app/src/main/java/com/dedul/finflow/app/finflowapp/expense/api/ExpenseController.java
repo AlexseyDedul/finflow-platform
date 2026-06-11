@@ -7,6 +7,8 @@ import com.dedul.finflow.app.finflowapp.expense.api.dto.CreateExpenseRequest;
 import com.dedul.finflow.app.finflowapp.expense.api.dto.ExpenseResponse;
 import com.dedul.finflow.app.finflowapp.expense.application.ExpenseService;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseStatus;
+import com.dedul.finflow.app.finflowapp.shared.security.CurrentUser;
+import com.dedul.finflow.app.finflowapp.shared.security.CurrentUserProvider;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -30,11 +32,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class ExpenseController {
   private final ExpenseService expenseService;
   private final DocumentService documentService;
+  private final CurrentUserProvider currentUserProvider;
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ExpenseResponse create(@Valid @RequestBody CreateExpenseRequest request) {
-    return expenseService.create(request);
+    CurrentUser currentUser = currentUserProvider.getCurrentUser();
+    return expenseService.create(currentUser.employeeId(), request);
   }
 
   @GetMapping("/{id}")
