@@ -28,8 +28,7 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEventEntity, 
       @Param("id") UUID id,
       @Param("processingStatus") OutboxEventStatus processingStatus,
       @Param("processingStartedAt") Instant processingStartedAt,
-      @Param("claimableStatuses") Collection<OutboxEventStatus> claimableStatuses
-  );
+      @Param("claimableStatuses") Collection<OutboxEventStatus> claimableStatuses);
 
   default int claimForProcessing(UUID id) {
     return claimForProcessing(

@@ -11,10 +11,10 @@ class OutboxEventEntityTest {
   @Test
   void pending_shouldCreatePendingEventWithZeroRetryCount() {
     OutboxEventEntity event =
-            OutboxEventEntity.pending(
-                    UUID.randomUUID(),
-                    "ExpenseSubmittedEvent",
-                    """
+        OutboxEventEntity.pending(
+            UUID.randomUUID(),
+            "ExpenseSubmittedEvent",
+            """
                     {"eventId":"00000000-0000-0000-0000-000000000001"}
                     """);
 
@@ -28,7 +28,7 @@ class OutboxEventEntityTest {
   @Test
   void markProcessing_shouldMovePendingToProcessing() {
     OutboxEventEntity event =
-            OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
+        OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
 
     event.markProcessing();
 
@@ -39,17 +39,17 @@ class OutboxEventEntityTest {
   @Test
   void markPublished_shouldAllowOnlyProcessingEvent() {
     OutboxEventEntity event =
-            OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
+        OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
 
     assertThatThrownBy(event::markPublished)
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Only PROCESSING outbox event can be marked PUBLISHED");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Only PROCESSING outbox event can be marked PUBLISHED");
   }
 
   @Test
   void markPublished_shouldMoveProcessingToPublished() {
     OutboxEventEntity event =
-            OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
+        OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
 
     event.markProcessing();
     event.markPublished();
@@ -61,7 +61,7 @@ class OutboxEventEntityTest {
   @Test
   void markFailed_shouldMoveEventToFailedAndIncrementRetryCount() {
     OutboxEventEntity event =
-            OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
+        OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
 
     event.markProcessing();
     event.markFailed("SQS unavailable");
@@ -74,7 +74,7 @@ class OutboxEventEntityTest {
   @Test
   void markFailed_shouldIncrementRetryCountEveryTime() {
     OutboxEventEntity event =
-            OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
+        OutboxEventEntity.pending(UUID.randomUUID(), "ExpenseSubmittedEvent", "{}");
 
     event.markFailed("first");
     event.markFailed("second");

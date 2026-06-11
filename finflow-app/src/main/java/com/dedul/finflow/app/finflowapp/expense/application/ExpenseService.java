@@ -25,10 +25,10 @@ public class ExpenseService {
   private final OutboxService outboxService;
 
   @Transactional
-  public ExpenseResponse create(CreateExpenseRequest request) {
+  public ExpenseResponse create(UUID employeeId, CreateExpenseRequest request) {
     ExpenseClaim expense =
         ExpenseClaim.createDraft(
-            request.employeeId(),
+            employeeId,
             new Money(request.amount(), CurrencyCode.of(request.currency())),
             request.category(),
             request.description());

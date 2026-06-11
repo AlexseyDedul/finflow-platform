@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:16
+    container_name: finflow-postgres
     environment:
       POSTGRES_DB: finflow
       POSTGRES_USER: finflow
@@ -96,7 +97,7 @@ services:
       init-localstack-sqs:
         condition: service_completed_successfully
       tempo:
-        condition: service_healthy
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finflow
@@ -112,6 +113,9 @@ services:
 
       APP_AWS_SQS_ENDPOINT: http://localstack:4566
       APP_AWS_SQS_EXPENSE_SUBMITTED_QUEUE_NAME: expense-submitted-events
+
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/finflow
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/finflow/protocol/openid-connect/certs
     ports:
       - "8080:8080"
 
@@ -147,12 +151,20 @@ services:
       - "9411:9411"
     volumes:
       - ./tempo/tempo.yml:/etc/tempo.yml:ro
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3200/ready"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: finflow-keycloak
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
 
 volumes:
   finflow-postgres-data:
