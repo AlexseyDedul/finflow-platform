@@ -4,6 +4,7 @@ import com.dedul.finflow.app.finflowapp.shared.events.EventEnvelope;
 import com.dedul.finflow.app.finflowapp.shared.events.ProcessedEventService;
 import com.dedul.finflow.app.finflowapp.shared.events.sqs.SqsMessageProcessingResult;
 import com.dedul.finflow.app.finflowapp.shared.events.sqs.SqsQueueUrlResolver;
+import com.dedul.finflow.app.finflowapp.shared.observability.BusinessMetrics;
 import com.dedul.finflow.app.finflowapp.workflow.application.WorkflowService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +33,7 @@ public class ExpenseSubmittedEventConsumer {
   private final WorkflowService workflowService;
   private final ProcessedEventService processedEventService;
   private final ObjectMapper objectMapper;
+  private final BusinessMetrics businessMetrics;
 
   @Qualifier("sqsMessageProcessingExecutor") private final Executor sqsMessageProcessingExecutor;
 
@@ -89,8 +91,10 @@ public class ExpenseSubmittedEventConsumer {
   private SqsMessageProcessingResult processMessage(Message message) {
     try {
       handle(message);
+      businessMetrics.incrementSqsMessagesProcessed();
       return SqsMessageProcessingResult.success(message);
     } catch (Exception e) {
+      businessMetrics.incrementSqsMessagesFailed();
       log.error("Failed to process SQS message: messageId={}", message.messageId(), e);
       return SqsMessageProcessingResult.failure(message, e);
     }

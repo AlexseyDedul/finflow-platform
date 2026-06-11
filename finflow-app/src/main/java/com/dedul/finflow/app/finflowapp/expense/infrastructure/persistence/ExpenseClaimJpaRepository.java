@@ -1,7 +1,6 @@
 package com.dedul.finflow.app.finflowapp.expense.infrastructure.persistence;
 
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseStatus;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +13,5 @@ public interface ExpenseClaimJpaRepository extends JpaRepository<ExpenseClaimEnt
       UUID employeeId, ExpenseStatus status);
 
   List<ExpenseClaimEntity> findByCreatedAtGreaterThanEqualAndCreatedAtLessThan(
-      Instant from,
-      Instant to
-  );
+      Instant from, Instant to);
 }

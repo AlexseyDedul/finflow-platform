@@ -29,18 +29,13 @@ public class S3ReportStorageService implements ReportStorageService {
             .contentType(contentType)
             .contentLength((long) content.length)
             .build(),
-        RequestBody.fromBytes(content)
-    );
+        RequestBody.fromBytes(content));
   }
 
   @Override
   public byte[] download(String key) {
-    ResponseBytes<GetObjectResponse> response = s3Client.getObjectAsBytes(
-        GetObjectRequest.builder()
-            .bucket(bucket)
-            .key(key)
-            .build()
-    );
+    ResponseBytes<GetObjectResponse> response =
+        s3Client.getObjectAsBytes(GetObjectRequest.builder().bucket(bucket).key(key).build());
 
     return response.asByteArray();
   }

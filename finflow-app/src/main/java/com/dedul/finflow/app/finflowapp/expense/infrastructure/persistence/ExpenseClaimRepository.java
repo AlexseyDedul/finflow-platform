@@ -4,7 +4,6 @@ import com.dedul.finflow.app.finflowapp.account.domain.CurrencyCode;
 import com.dedul.finflow.app.finflowapp.account.domain.Money;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseClaim;
 import com.dedul.finflow.app.finflowapp.expense.domain.ExpenseStatus;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -44,11 +43,9 @@ public class ExpenseClaimRepository {
   }
 
   public List<ExpenseClaim> findCreatedBetween(Instant from, Instant to) {
-    return jpaRepository
-            .findByCreatedAtGreaterThanEqualAndCreatedAtLessThan(from, to)
-            .stream()
-            .map(this::toDomain)
-            .toList();
+    return jpaRepository.findByCreatedAtGreaterThanEqualAndCreatedAtLessThan(from, to).stream()
+        .map(this::toDomain)
+        .toList();
   }
 
   private ExpenseClaimEntity toEntity(ExpenseClaim expense) {
@@ -62,7 +59,8 @@ public class ExpenseClaimRepository {
         expense.status(),
         expense.createdAt(),
         expense.submittedAt(),
-        expense.cancelledAt());
+        expense.cancelledAt(),
+        expense.version());
   }
 
   private ExpenseClaim toDomain(ExpenseClaimEntity entity) {
@@ -75,6 +73,7 @@ public class ExpenseClaimRepository {
         entity.getStatus(),
         entity.getCreatedAt(),
         entity.getSubmittedAt(),
-        entity.getCancelledAt());
+        entity.getCancelledAt(),
+        entity.getVersion());
   }
 }

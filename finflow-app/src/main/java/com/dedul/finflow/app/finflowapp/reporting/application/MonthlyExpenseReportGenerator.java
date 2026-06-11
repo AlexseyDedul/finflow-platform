@@ -21,16 +21,9 @@ public class MonthlyExpenseReportGenerator {
   public String generate(String month) {
     YearMonth yearMonth = YearMonth.parse(month);
 
-    var from = yearMonth
-        .atDay(1)
-        .atStartOfDay()
-        .toInstant(ZoneOffset.UTC);
+    var from = yearMonth.atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
-    var to = yearMonth
-        .plusMonths(1)
-        .atDay(1)
-        .atStartOfDay()
-        .toInstant(ZoneOffset.UTC);
+    var to = yearMonth.plusMonths(1).atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
     List<ExpenseClaim> expenses = expenseClaimRepository.findCreatedBetween(from, to);
 
@@ -38,51 +31,55 @@ public class MonthlyExpenseReportGenerator {
 
     csv.append("month,totalExpenses,totalAmount,currency\n");
 
-    Map<String, List<ExpenseClaim>> byCurrency = expenses.stream()
-        .collect(Collectors.groupingBy(expense -> expense.amount().currency().value()));
+    Map<String, List<ExpenseClaim>> byCurrency =
+        expenses.stream()
+            .collect(Collectors.groupingBy(expense -> expense.amount().currency().value()));
 
-    byCurrency.entrySet()
-        .stream()
+    byCurrency.entrySet().stream()
         .sorted(Map.Entry.comparingByKey())
-        .forEach(entry -> {
-          String currency = entry.getKey();
-          List<ExpenseClaim> currencyExpenses = entry.getValue();
+        .forEach(
+            entry -> {
+              String currency = entry.getKey();
+              List<ExpenseClaim> currencyExpenses = entry.getValue();
 
-          BigDecimal total = currencyExpenses.stream()
-              .map(expense -> expense.amount().amount())
-              .reduce(BigDecimal.ZERO, BigDecimal::add);
+              BigDecimal total =
+                  currencyExpenses.stream()
+                      .map(expense -> expense.amount().amount())
+                      .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-          csv.append(month)
-              .append(',')
-              .append(currencyExpenses.size())
-              .append(',')
-              .append(total)
-              .append(',')
-              .append(currency)
-              .append('\n');
-        });
+              csv.append(month)
+                  .append(',')
+                  .append(currencyExpenses.size())
+                  .append(',')
+                  .append(total)
+                  .append(',')
+                  .append(currency)
+                  .append('\n');
+            });
 
     csv.append('\n');
     csv.append("expenseId,employeeId,status,category,amount,currency,createdAt,description\n");
 
     expenses.stream()
         .sorted(Comparator.comparing(ExpenseClaim::createdAt))
-        .forEach(expense -> csv.append(expense.id())
-            .append(',')
-            .append(expense.employeeId())
-            .append(',')
-            .append(expense.status())
-            .append(',')
-            .append(expense.category())
-            .append(',')
-            .append(expense.amount().amount())
-            .append(',')
-            .append(expense.amount().currency().value())
-            .append(',')
-            .append(expense.createdAt())
-            .append(',')
-            .append(escapeCsv(expense.description()))
-            .append('\n'));
+        .forEach(
+            expense ->
+                csv.append(expense.id())
+                    .append(',')
+                    .append(expense.employeeId())
+                    .append(',')
+                    .append(expense.status())
+                    .append(',')
+                    .append(expense.category())
+                    .append(',')
+                    .append(expense.amount().amount())
+                    .append(',')
+                    .append(expense.amount().currency().value())
+                    .append(',')
+                    .append(expense.createdAt())
+                    .append(',')
+                    .append(escapeCsv(expense.description()))
+                    .append('\n'));
 
     return csv.toString();
   }
@@ -92,10 +89,8 @@ public class MonthlyExpenseReportGenerator {
       return "";
     }
 
-    boolean mustQuote = value.contains(",")
-        || value.contains("\"")
-        || value.contains("\n")
-        || value.contains("\r");
+    boolean mustQuote =
+        value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r");
 
     String escaped = value.replace("\"", "\"\"");
 

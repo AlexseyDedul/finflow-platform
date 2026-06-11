@@ -17,7 +17,20 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: finflow-app
+      environment: docker
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://tempo:9411/api/v2/spans
 
 app:
   aws:
@@ -51,4 +64,4 @@ camunda:
 
 logging:
   pattern:
-    level: "%5p [correlationId:%X{correlationId:-}]"
+    level: "%5p [traceId:%X{traceId:-}, spanId:%X{spanId:-}, correlationId:%X{correlationId:-}]"

@@ -1,0 +1,4 @@
+ALTER TABLE outbox_events
+ADD COLUMN retry_count INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN last_error TEXT,
+ADD COLUMN processing_started_at TIMESTAMP WITH TIME ZONE;

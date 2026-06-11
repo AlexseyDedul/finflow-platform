@@ -16,5 +16,4 @@ public record ReportJobResponse(
     String errorMessage,
     Instant createdAt,
     Instant startedAt,
-    Instant completedAt
-) {}
+    Instant completedAt) {}

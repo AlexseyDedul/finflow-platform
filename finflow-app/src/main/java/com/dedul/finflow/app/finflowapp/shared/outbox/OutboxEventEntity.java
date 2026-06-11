@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -42,6 +43,17 @@ public class OutboxEventEntity {
   @Column(name = "published_at")
   private Instant publishedAt;
 
+  @Column(name = "retry_count")
+  private Integer retryCount = 0;
+
+  @Column(name = "last_error")
+  private String lastError;
+
+  @Column(name = "processing_started_at")
+  private Instant processingStartedAt;
+
+  @Version private Long version;
+
   public OutboxEventEntity(
       UUID id,
       UUID aggregateId,
@@ -49,7 +61,11 @@ public class OutboxEventEntity {
       String payload,
       OutboxEventStatus status,
       Instant createdAt,
-      Instant publishedAt) {
+      Instant publishedAt,
+      Integer retryCount,
+      String lastError,
+      Instant processingStartedAt,
+      Long version) {
     this.id = id;
     this.aggregateId = aggregateId;
     this.eventType = eventType;
@@ -57,6 +73,10 @@ public class OutboxEventEntity {
     this.status = status;
     this.createdAt = createdAt;
     this.publishedAt = publishedAt;
+    this.retryCount = retryCount == null ? 0 : retryCount;
+    this.lastError = lastError;
+    this.processingStartedAt = processingStartedAt;
+    this.version = version;
   }
 
   public static OutboxEventEntity pending(UUID aggregateId, String eventType, String payload) {
@@ -67,6 +87,10 @@ public class OutboxEventEntity {
         payload,
         OutboxEventStatus.PENDING,
         Instant.now(),
+        null,
+        0,
+        null,
+        null,
         null);
   }
 
@@ -76,14 +100,22 @@ public class OutboxEventEntity {
     }
 
     status = OutboxEventStatus.PROCESSING;
+    processingStartedAt = Instant.now();
   }
 
   public void markPublished() {
+    if (status != OutboxEventStatus.PROCESSING) {
+      throw new IllegalStateException(
+          "Only PROCESSING outbox event can be marked PUBLISHED. Current status: " + status);
+    }
+
     status = OutboxEventStatus.PUBLISHED;
     publishedAt = Instant.now();
   }
 
-  public void markFailed() {
+  public void markFailed(String errorMessage) {
     status = OutboxEventStatus.FAILED;
+    retryCount = retryCount == null ? 1 : retryCount + 1;
+    lastError = errorMessage;
   }
 }

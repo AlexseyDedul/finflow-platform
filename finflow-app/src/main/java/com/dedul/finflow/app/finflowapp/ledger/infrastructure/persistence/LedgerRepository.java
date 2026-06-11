@@ -56,7 +56,8 @@ public class LedgerRepository {
         entity.getReferenceType(),
         entity.getStatus(),
         entity.getCreatedAt(),
-        entries);
+        entries,
+        entity.getVersion());
   }
 
   private LedgerTransactionEntity toTransactionEntity(LedgerTransaction transaction) {
@@ -65,7 +66,8 @@ public class LedgerRepository {
         transaction.getReferenceId(),
         transaction.getReferenceType(),
         transaction.getStatus(),
-        transaction.getCreatedAt());
+        transaction.getCreatedAt(),
+        transaction.getVersion());
   }
 
   private LedgerEntryEntity toEntryEntity(LedgerEntry entry) {

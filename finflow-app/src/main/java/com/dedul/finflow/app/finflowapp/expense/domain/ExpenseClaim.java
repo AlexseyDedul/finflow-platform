@@ -16,6 +16,7 @@ public class ExpenseClaim {
   private final Instant createdAt;
   private Instant submittedAt;
   private Instant cancelledAt;
+  private final Long version;
 
   private ExpenseClaim(
       UUID id,
@@ -26,7 +27,8 @@ public class ExpenseClaim {
       ExpenseStatus status,
       Instant createdAt,
       Instant submittedAt,
-      Instant cancelledAt) {
+      Instant cancelledAt,
+      Long version) {
     this.id = Objects.requireNonNull(id, "id must not be null");
     this.employeeId = Objects.requireNonNull(employeeId, "employeeId must not be null");
     this.amount = Objects.requireNonNull(amount, "amount must not be null");
@@ -36,6 +38,7 @@ public class ExpenseClaim {
     this.createdAt = Objects.requireNonNull(createdAt, "createdAt must not be null");
     this.submittedAt = submittedAt;
     this.cancelledAt = cancelledAt;
+    this.version = version;
     if (!amount.isPositive()) {
       throw new IllegalArgumentException("Expense amount must be positive");
     }
@@ -52,6 +55,7 @@ public class ExpenseClaim {
         ExpenseStatus.DRAFT,
         Instant.now(),
         null,
+        null,
         null);
   }
 
@@ -64,9 +68,19 @@ public class ExpenseClaim {
       ExpenseStatus status,
       Instant createdAt,
       Instant submittedAt,
-      Instant cancelledAt) {
+      Instant cancelledAt,
+      Long version) {
     return new ExpenseClaim(
-        id, employeeId, amount, category, description, status, createdAt, submittedAt, cancelledAt);
+        id,
+        employeeId,
+        amount,
+        category,
+        description,
+        status,
+        createdAt,
+        submittedAt,
+        cancelledAt,
+        version);
   }
 
   public void approve() {
@@ -151,5 +165,9 @@ public class ExpenseClaim {
 
   public Instant cancelledAt() {
     return cancelledAt;
+  }
+
+  public Long version() {
+    return version;
   }
 }
