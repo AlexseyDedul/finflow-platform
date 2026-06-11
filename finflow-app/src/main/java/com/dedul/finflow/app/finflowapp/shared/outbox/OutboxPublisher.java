@@ -2,6 +2,7 @@ package com.dedul.finflow.app.finflowapp.shared.outbox;
 
 import com.dedul.finflow.app.finflowapp.shared.events.sqs.SqsEventPublisher;
 import com.dedul.finflow.app.finflowapp.shared.events.sqs.SqsQueueUrlResolver;
+import com.dedul.finflow.app.finflowapp.shared.observability.BusinessMetrics;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ public class OutboxPublisher {
   private final OutboxEventRepository repository;
   private final SqsQueueUrlResolver queueUrlResolver;
   private final SqsEventPublisher sqsEventPublisher;
+  private final BusinessMetrics businessMetrics;
 
   @Value("${app.aws.sqs.expense-submitted-queue-name}")
   private String expenseSubmittedQueueName;
@@ -37,13 +39,26 @@ public class OutboxPublisher {
 
     log.info("Publishing outbox events: count={}", events.size());
 
-    for (OutboxEventEntity event : events) {
-      try {
-        event.markProcessing();
+    for (OutboxEventEntity candidate : events) {
+      int claim = repository.claimForProcessing(candidate.getId());
 
+      if (claim == 0) {
+        log.info("Outbox event already claimed by another worker: id={}", candidate.getId());
+        continue;
+      }
+
+      OutboxEventEntity event =
+          repository
+              .findById(candidate.getId())
+              .orElseThrow(
+                  () ->
+                      new IllegalStateException(
+                          "Claimed outbox event not found: " + candidate.getId()));
+
+      try {
         sqsEventPublisher.publishRaw(queueUrl, event.getPayload());
 
-        event.markPublished();
+        businessMetrics.incrementOutboxEventsPublished();
 
         log.info(
             "Published outbox event: outboxEventId={}, eventType={}, aggregateId={}",
@@ -51,8 +66,10 @@ public class OutboxPublisher {
             event.getEventType(),
             event.getAggregateId());
       } catch (Exception e) {
-        event.markFailed();
+        String errMsg = "Error publishing outbox event: " + e.getMessage();
 
+        event.markFailed(errMsg);
+        businessMetrics.incrementOutboxEventsFailed();
         log.error(
             "Failed to publish outbox event: outboxEventId={}, eventType={}, aggregateId={}",
             event.getId(),

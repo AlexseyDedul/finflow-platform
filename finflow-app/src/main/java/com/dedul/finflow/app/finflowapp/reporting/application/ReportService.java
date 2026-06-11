@@ -24,28 +24,33 @@ public class ReportService {
     ReportJobEntity job = ReportJobEntity.createMonthlyExpensesJob(month);
     ReportJobEntity saved = repository.save(job);
 
-    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-      @Override
-      public void afterCommit() {
-        reportWorker.generateMonthlyExpensesReportAsync(saved.getId());
-      }
-    });
+    TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+          @Override
+          public void afterCommit() {
+            reportWorker.generateMonthlyExpensesReportAsync(saved.getId());
+          }
+        });
 
     return toResponse(saved);
   }
 
   @Transactional(readOnly = true)
   public ReportJobResponse getJob(UUID jobId) {
-    ReportJobEntity job = repository.findById(jobId)
-        .orElseThrow(() -> new NotFoundException("Report job not found: " + jobId));
+    ReportJobEntity job =
+        repository
+            .findById(jobId)
+            .orElseThrow(() -> new NotFoundException("Report job not found: " + jobId));
 
     return toResponse(job);
   }
 
   @Transactional(readOnly = true)
   public String getReportContent(UUID jobId) {
-    ReportJobEntity job = repository.findById(jobId)
-        .orElseThrow(() -> new NotFoundException("Report job not found: " + jobId));
+    ReportJobEntity job =
+        repository
+            .findById(jobId)
+            .orElseThrow(() -> new NotFoundException("Report job not found: " + jobId));
 
     if (job.getResultContent() == null) {
       throw new IllegalStateException("Report is not ready yet: " + jobId);
@@ -56,7 +61,9 @@ public class ReportService {
 
   @Transactional(readOnly = true)
   public ReportDownload getReportDownload(UUID jobId) {
-    ReportJobEntity job = repository.findById(jobId)
+    ReportJobEntity job =
+        repository
+            .findById(jobId)
             .orElseThrow(() -> new NotFoundException("Report job not found: " + jobId));
 
     if (job.getResultStorageKey() == null) {
@@ -65,11 +72,7 @@ public class ReportService {
 
     byte[] content = reportStorageService.download(job.getResultStorageKey());
 
-    return new ReportDownload(
-            job.getResultFilename(),
-            job.getResultContentType(),
-            content
-    );
+    return new ReportDownload(job.getResultFilename(), job.getResultContentType(), content);
   }
 
   private ReportJobResponse toResponse(ReportJobEntity job) {
@@ -84,7 +87,6 @@ public class ReportService {
         job.getErrorMessage(),
         job.getCreatedAt(),
         job.getStartedAt(),
-        job.getCompletedAt()
-    );
+        job.getCompletedAt());
   }
 }

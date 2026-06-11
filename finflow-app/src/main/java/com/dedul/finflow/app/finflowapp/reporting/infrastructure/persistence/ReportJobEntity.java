@@ -8,6 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -20,8 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReportJobEntity {
 
-  @Id
-  private UUID id;
+  @Id private UUID id;
 
   @Enumerated(EnumType.STRING)
   @Column(name = "report_type", nullable = false, length = 100)
@@ -58,6 +58,8 @@ public class ReportJobEntity {
   @Column(name = "result_filename", length = 255)
   private String resultFilename;
 
+  @Version private Long version;
+
   public static ReportJobEntity createMonthlyExpensesJob(String requestedMonth) {
     ReportJobEntity job = new ReportJobEntity();
     job.id = UUID.randomUUID();
@@ -74,10 +76,7 @@ public class ReportJobEntity {
   }
 
   public void markCompleted(
-      String resultStorageKey,
-      String resultContentType,
-      String resultFilename
-  ) {
+      String resultStorageKey, String resultContentType, String resultFilename) {
     status = ReportJobStatus.COMPLETED;
     this.resultStorageKey = resultStorageKey;
     this.resultContentType = resultContentType;

@@ -1,6 +1,7 @@
 package com.dedul.finflow.app.finflowapp.shared.infrastructure.aws;
 
 import java.net.URI;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.SqsClientBuilder;
 
+@Slf4j
 @Configuration
 public class AwsSqsConfig {
   @Bean
@@ -20,6 +22,11 @@ public class AwsSqsConfig {
       @Value("${app.aws.sqs.endpoint}") String sqsEndpoint,
       @Value("${app.aws.sqs.access-key}") String accessKey,
       @Value("${app.aws.sqs.access-secret}") String secretKey) {
+    log.info(
+        "Creating SQS client: region={}, endpoint={}, accessKeyPresent={}",
+        region,
+        sqsEndpoint,
+        accessKey != null && !accessKey.isBlank());
     AwsCredentialsProvider awsCredentialsProvider =
         accessKey == null || accessKey.isBlank()
             ? DefaultCredentialsProvider.builder().build()

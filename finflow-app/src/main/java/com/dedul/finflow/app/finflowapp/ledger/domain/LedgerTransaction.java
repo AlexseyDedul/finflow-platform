@@ -18,6 +18,7 @@ public class LedgerTransaction {
   private final LedgerTransactionStatus status;
   private final Instant createdAt;
   private final List<LedgerEntry> entries;
+  private final Long version;
 
   public static LedgerTransaction post(
       UUID referenceId,
@@ -45,7 +46,8 @@ public class LedgerTransaction {
         referenceType,
         LedgerTransactionStatus.POSTED,
         Instant.now(),
-        entries);
+        entries,
+        null);
   }
 
   public static LedgerTransaction restore(
@@ -54,7 +56,8 @@ public class LedgerTransaction {
       LedgerReferenceType referenceType,
       LedgerTransactionStatus status,
       Instant createdAt,
-      List<LedgerEntry> entries) {
+      List<LedgerEntry> entries,
+      Long version) {
     if (id == null) {
       throw new IllegalArgumentException("id must not be null");
     }
@@ -68,7 +71,7 @@ public class LedgerTransaction {
     validateTransaction(referenceId, referenceType, entries);
 
     return new LedgerTransaction(
-        id, referenceId, referenceType, status, createdAt, List.copyOf(entries));
+        id, referenceId, referenceType, status, createdAt, List.copyOf(entries), version);
   }
 
   private static void validateTransaction(

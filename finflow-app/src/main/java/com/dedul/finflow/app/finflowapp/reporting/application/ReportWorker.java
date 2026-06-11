@@ -2,7 +2,7 @@ package com.dedul.finflow.app.finflowapp.reporting.application;
 
 import com.dedul.finflow.app.finflowapp.reporting.infrastructure.persistence.ReportJobEntity;
 import com.dedul.finflow.app.finflowapp.reporting.infrastructure.persistence.ReportJobRepository;
-
+import com.dedul.finflow.app.finflowapp.shared.observability.BusinessMetrics;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,40 +20,41 @@ public class ReportWorker {
   private final ReportJobRepository repository;
   private final MonthlyExpenseReportGenerator generator;
   private final ReportStorageService reportStorageService;
+  private final BusinessMetrics businessMetrics;
 
   @Async("applicationTaskExecutor")
   @Transactional
   public void generateMonthlyExpensesReportAsync(UUID jobId) {
-    ReportJobEntity job = repository.findById(jobId)
-        .orElseThrow(() -> new IllegalStateException("Report job not found: " + jobId));
+    int claim = repository.claimPendingJob(jobId);
+    if (claim == 0) {
+      log.info("Report job already claimed or not pending: jobId={}", jobId);
+      return;
+    }
+
+    ReportJobEntity job =
+        repository
+            .findById(jobId)
+            .orElseThrow(() -> new IllegalStateException("Report job not found: " + jobId));
 
     try {
-      job.markRunning();
-
       String content = generator.generate(job.getRequestedMonth());
       String filename = "monthly-expenses-%s.csv".formatted(job.getRequestedMonth());
-      String storageKey = "reports/monthly-expenses/%s/%s.csv"
-          .formatted(job.getRequestedMonth(), job.getId());
+      String storageKey =
+          "reports/monthly-expenses/%s/%s.csv".formatted(job.getRequestedMonth(), job.getId());
 
       reportStorageService.upload(
-          storageKey,
-          CONTENT_TYPE_CSV,
-          content.getBytes(StandardCharsets.UTF_8)
-      );
+          storageKey, CONTENT_TYPE_CSV, content.getBytes(StandardCharsets.UTF_8));
 
-      job.markCompleted(
-          storageKey,
-          CONTENT_TYPE_CSV,
-          filename
-      );
+      job.markCompleted(storageKey, CONTENT_TYPE_CSV, filename);
+      businessMetrics.incrementReportsGenerated();
 
       log.info(
           "Monthly expense report generated and uploaded: jobId={}, storageKey={}",
           jobId,
-          storageKey
-      );
+          storageKey);
     } catch (Exception e) {
       job.markFailed(e.getMessage());
+      businessMetrics.incrementReportsFailed();
 
       log.error("Monthly expense report generation failed: jobId={}", jobId, e);
     }
