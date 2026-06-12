@@ -3,6 +3,8 @@ package com.dedul.finflow.app.finflowapp.shared.security;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -80,6 +83,27 @@ class SecurityAuthorizationTest {
         .perform(
             get("/api/ledger/accounts")
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_FINANCE"))))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isNotFound())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+        .andExpect(jsonPath("$.path").value("/api/ledger/accounts"));
+  }
+
+  @Test
+  void shouldReturnJsonErrorWhenEmployeeAccessesManagerEndpoint() throws Exception {
+    mockMvc
+        .perform(
+            get("/api/workflow/tasks")
+                .with(
+                    jwt()
+                        .jwt(jwt -> jwt.claim("employeeId", "00000000-0000-0000-0000-000000000001"))
+                        .authorities(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.status").value(403))
+        .andExpect(jsonPath("$.error").value("FORBIDDEN"))
+        .andExpect(jsonPath("$.message").value("Access denied"))
+        .andExpect(jsonPath("$.path").value("/api/workflow/tasks"));
   }
 }

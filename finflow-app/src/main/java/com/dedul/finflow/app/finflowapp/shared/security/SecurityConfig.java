@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -20,7 +21,11 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+  private final RestAuthenticationEntryPoint authenticationEntryPoint;
+  private final RestAccessDeniedHandler accessDeniedHandler;
+
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(AbstractHttpConfigurer::disable)
@@ -54,6 +59,11 @@ public class SecurityConfig {
         .oauth2ResourceServer(
             oauth2 ->
                 oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler))
         .build();
   }
 

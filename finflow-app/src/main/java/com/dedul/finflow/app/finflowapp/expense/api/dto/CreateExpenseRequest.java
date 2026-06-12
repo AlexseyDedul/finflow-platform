@@ -7,10 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public record CreateExpenseRequest(
-    @NotNull UUID employeeId,
     @NotNull @DecimalMin(value = "0.01", message = "amount must be greater than zero") @Digits(integer = 15, fraction = 4) BigDecimal amount,
     @NotNull @Pattern(
             regexp = "^[A-Z]{3}$",
