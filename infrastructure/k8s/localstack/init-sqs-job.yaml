@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-localstack-sqs
+  namespace: finflow
+spec:
+  template:
+    metadata:
+      labels:
+        app: init-localstack-sqs
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: awscli
+          image: amazon/aws-cli:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - |
+              aws --endpoint-url=http://localstack:4566 sqs create-queue \
+                --queue-name expense-submitted-events \
+                --region eu-central-1
+              aws --endpoint-url=http://localstack:4566 sqs list-queues \
+                --region eu-central-1
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              value: test
+            - name: AWS_SECRET_ACCESS_KEY
+              value: test
+            - name: AWS_DEFAULT_REGION
+              value: eu-central-1

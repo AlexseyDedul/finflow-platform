@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: finflow
+  name: finflow-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: finflow-app
+  template:
+    metadata:
+      labels:
+        app: finflow-app
+    spec:
+      containers:
+        - name: finflow-app
+          imagePullPolicy: IfNotPresent
+          image: finflow-app:local
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: finflow-app-config
+            - secretRef:
+                name: finflow-app-secret
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health
+            initialDelaySeconds: 90
+            periodSeconds: 20
+            failureThreshold: 5

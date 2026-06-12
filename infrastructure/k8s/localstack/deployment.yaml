@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: finflow
+  name: localstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: localstack
+  template:
+    metadata:
+      labels:
+        app: localstack
+    spec:
+      containers:
+        - name: localstack
+          imagePullPolicy: IfNotPresent
+          image: localstack/localstack:4.4.0
+          ports:
+            - containerPort: 4566
+          env:
+            - name: SERVICES
+              value: sqs
+            - name: AWS_DEFAULT_REGION
+              value: eu-central-1
+          readinessProbe:
+            httpGet:
+              port: 4566
+              path: /_localstack/health
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              port: 4566
+              path: /_localstack/health
+            initialDelaySeconds: 30
+            periodSeconds: 10
