@@ -7,14 +7,22 @@ data:
   SPRING_PROFILES_ACTIVE: docker
   SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/finflow
   SPRING_DATASOURCE_USERNAME: finflow
+
+  MANAGEMENT_TRACING_ENABLED: "false"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: ""
+  MANAGEMENT_METRICS_TAGS_ENVIRONMENT: k8s
+
   APP_AWS_REGION: eu-central-1
+
   APP_AWS_S3_ENDPOINT: http://minio:9000
   APP_AWS_S3_ACCESS_KEY: local_env
   APP_AWS_S3_FORCE_PATH_STYLE: "true"
   APP_AWS_S3_DOCUMENTS_BUCKET: finflow-documents
+
   APP_AWS_SQS_ENDPOINT: http://localstack:4566
   APP_AWS_SQS_ACCESS_KEY: test
   APP_AWS_SQS_ACCESS_SECRET: test
   APP_AWS_SQS_EXPENSE_SUBMITTED_QUEUE_NAME: expense-submitted-events
+
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/finflow
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/finflow/protocol/openid-connect/certs
