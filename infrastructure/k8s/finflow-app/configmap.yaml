@@ -26,3 +26,6 @@ data:
 
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8180/realms/finflow
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/finflow/protocol/openid-connect/certs
+
+  SERVER_SHUTDOWN: graceful
+  SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE: 30s

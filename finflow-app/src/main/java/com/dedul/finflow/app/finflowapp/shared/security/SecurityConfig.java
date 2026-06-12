@@ -28,6 +28,7 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers(
                         "/actuator/health",
+                        "/actuator/health/**",
                         "/actuator/info",
                         "/actuator/prometheus",
                         "/swagger-ui/**",

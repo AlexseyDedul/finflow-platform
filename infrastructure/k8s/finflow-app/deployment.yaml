@@ -13,28 +13,52 @@ spec:
       labels:
         app: finflow-app
     spec:
+      serviceAccountName: finflow-app
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: false
+      terminationGracePeriodSeconds: 45
       containers:
         - name: finflow-app
           imagePullPolicy: IfNotPresent
           image: finflow-app:local
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
           envFrom:
             - configMapRef:
                 name: finflow-app-config
             - secretRef:
                 name: finflow-app-secret
+          startupProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               port: 8080
-              path: /actuator/health
+              path: /actuator/health/readiness
             initialDelaySeconds: 40
             periodSeconds: 10
             failureThreshold: 12
           livenessProbe:
             httpGet:
               port: 8080
-              path: /actuator/health
+              path: /actuator/health/liveness
             initialDelaySeconds: 90
             periodSeconds: 20
             failureThreshold: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
