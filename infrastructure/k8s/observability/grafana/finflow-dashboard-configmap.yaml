@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-finflow-dashboard
+  namespace: finflow
+data:
+  finflow-overview.json: |
+    {
+      "uid": "finflow-overview",
+      "title": "FinFlow Overview",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "10s",
+      "time": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "id": 1,
+          "title": "Application Up",
+          "type": "stat",
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "up{job=\"finflow-app\"}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "HTTP Requests",
+          "type": "timeseries",
+          "gridPos": { "x": 6, "y": 0, "w": 9, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(rate(http_server_requests_seconds_count{job=\"finflow-app\"}[1m]))",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "JVM Memory Used",
+          "type": "timeseries",
+          "gridPos": { "x": 15, "y": 0, "w": 9, "h": 4 },
+          "targets": [
+            {
+              "expr": "sum(jvm_memory_used_bytes{job=\"finflow-app\"})",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Outbox Pending",
+          "type": "stat",
+          "gridPos": { "x": 0, "y": 4, "w": 6, "h": 4 },
+          "targets": [
+            {
+              "expr": "finflow_outbox_events_pending",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "SQS Received",
+          "type": "timeseries",
+          "gridPos": { "x": 6, "y": 4, "w": 9, "h": 4 },
+          "targets": [
+            {
+              "expr": "rate(finflow_sqs_messages_received_total[1m])",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Reports Jobs Failed",
+          "type": "stat",
+          "gridPos": { "x": 15, "y": 4, "w": 9, "h": 4 },
+          "targets": [
+            {
+              "expr": "finflow_reports_jobs_failed",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
