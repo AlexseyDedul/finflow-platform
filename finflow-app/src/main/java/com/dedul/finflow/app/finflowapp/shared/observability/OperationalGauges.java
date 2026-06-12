@@ -43,7 +43,7 @@ public class OperationalGauges {
         .register(registry);
 
     Gauge.builder(
-            "finflow_reports_failed",
+            "finflow_reports_jobs_failed",
             reportJobRepository,
             repository -> repository.countByStatus(ReportJobStatus.FAILED))
         .description("Current number of failed report jobs")
