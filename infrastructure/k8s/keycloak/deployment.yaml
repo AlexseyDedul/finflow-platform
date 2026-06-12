@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: finflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - start-dev
+            - --import-realm
+            - --hostname=http://localhost:8180
+            - --hostname-strict=false
+            - --http-enabled=true
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              value: admin
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              value: admin
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /opt/keycloak/data/import/realm-export.json
+              name: keycloak-realm
+              subPath: realm-export.json
+      volumes:
+        - name: keycloak-realm
+          configMap:
+            name: keycloak-realm

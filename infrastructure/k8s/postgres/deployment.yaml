@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: finflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - finflow
+                - -d
+                - finflow
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - finflow
+                - -d
+                - finflow
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data

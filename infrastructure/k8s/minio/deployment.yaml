@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: finflow
+  name: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":9001"
+          ports:
+            - containerPort: 9000
+              name: api
+            - name: console
+              containerPort: 9001
+          envFrom:
+            - secretRef:
+                name: minio-secret
+          readinessProbe:
+            httpGet:
+              port: 9000
+              path: /minio/health/ready
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              port: 9000
+              path: /minio/health/live
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /data
+              name: minio-data
+      volumes:
+        - name: minio-data
+          persistentVolumeClaim:
+            claimName: minio-data
